@@ -38,7 +38,7 @@ footer {
 .categoria-card img {
   width: 100%;
   height: 220px; /* ajusta según prefieras */
-  object-fit: contain; /* 🔹 muestra la imagen completa sin recortarla */
+  object-fit: contain; /* muestra la imagen completa sin recortarla */
   background-color: #f8f9fa; /* opcional */
   padding: 10px;
 }

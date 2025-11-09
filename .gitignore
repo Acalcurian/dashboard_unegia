@@ -31,7 +31,7 @@ config.py
 local_settings.py 
 settings.ini
 
-# -------------------------
+# -------------------------git add .
 # ARCHIVOS DEL SISTEMA OPERATIVO
 # -------------------------
 .DS_Store # macOS

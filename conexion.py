@@ -13,7 +13,7 @@ def obtener_conexion():
         )
         return conexion
     except Exception as e:
-        print("❌ Error al conectar a la base de datos sedes_uneg:", e)
+        print("Error al conectar a la base de datos sedes_uneg:", e)
         return None
 
 
@@ -30,7 +30,7 @@ def obtener_conexion_categorias():
         )
         return conexion
     except Exception as e:
-        print("❌ Error al conectar a la base de datos categorias_fallas:", e)
+        print("Error al conectar a la base de datos categorias_fallas:", e)
         return None
 
 
@@ -40,12 +40,12 @@ def obtener_conexion_reportes_generales():
         conexion = psycopg2.connect(
             host="localhost",
             user="postgres",
-            password="root123",   # ⚠️ en tu código anterior pusiste "troot123" (error tipográfico)
+            password="root123",   #  en tu código anterior pusiste "troot123" (error tipográfico)
             dbname="reportes_generales",
             port="5432",
             client_encoding="UTF8"
         )
         return conexion
     except Exception as e:
-        print("❌ Error al conectar a la base de datos reportes_generales:", e)
+        print("Error al conectar a la base de datos reportes_generales:", e)
         return None

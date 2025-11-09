@@ -28,7 +28,7 @@ def allowed_file(filename):
 
 
 # -----------------------------------------------------
-# 🟢 INDEX Y FORMULARIO
+# INDEX Y FORMULARIO
 # -----------------------------------------------------
 
 @app.route('/')
@@ -105,7 +105,7 @@ def obtener_fallas(categoria_id):
 
 
 # -----------------------------------------------------
-# 🟢 REPORTES - LISTAR
+# REPORTES - LISTAR
 # -----------------------------------------------------
 
 @app.route('/reportes', methods=['GET'])
@@ -165,7 +165,7 @@ def reportes():
 
 
 # -----------------------------------------------------
-# 🟢 ENVIAR REPORTE
+# ENVIAR REPORTE
 # -----------------------------------------------------
 
 @app.route('/enviar_reporte', methods=['POST'])
@@ -212,7 +212,7 @@ def enviar_reporte():
 
 
 # -----------------------------------------------------
-# 🟢 EDITAR REPORTE
+# EDITAR REPORTE
 # -----------------------------------------------------
 
 @app.route('/editar_reporte/<int:reporte_id>', methods=['GET', 'POST'])
@@ -296,7 +296,7 @@ def editar_reporte(reporte_id):
 
 
 # -----------------------------------------------------
-# 🟢 BORRAR REPORTE
+# BORRAR REPORTE
 # -----------------------------------------------------
 
 @app.route('/borrar_reporte/<int:reporte_id>', methods=['POST'])
@@ -310,7 +310,7 @@ def borrar_reporte(reporte_id):
         if not reporte:
             cursor.close()
             conexion.close()
-            flash("⚠️ Reporte no encontrado.", "warning")
+            flash("Reporte no encontrado.", "warning")
             return redirect(url_for('reportes'))
 
         foto_path = reporte.get('foto_path')
@@ -339,7 +339,7 @@ def borrar_reporte(reporte_id):
 
 
 # -----------------------------------------------------
-# 🟢 API DE DASHBOARD
+#API DE DASHBOARD
 # -----------------------------------------------------
 
 @app.route('/api/fallas_por_sede_categoria')

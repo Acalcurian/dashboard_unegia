@@ -12,7 +12,7 @@ dashboard_bp = Blueprint('dashboard', __name__)
 @dashboard_bp.route("/dashboard")
 def dashboard():
     try:
-        # 🔹 1) Contar totales por categoría en reportes_generales
+        # 1) Contar totales por categoría en reportes_generales
         conexion_r = obtener_conexion_reportes_generales()
         cur_r = conexion_r.cursor(dictionary=True)
         cur_r.execute("""
@@ -24,7 +24,7 @@ def dashboard():
         cur_r.close()
         conexion_r.close()
 
-        # 🔹 2) Obtener nombres de categorías desde categorias_fallas
+        # 2) Obtener nombres de categorías desde categorias_fallas
         conexion_cat = obtener_conexion_categorias()
         cur_cat = conexion_cat.cursor(dictionary=True)
         cur_cat.execute("SELECT id, nombre FROM categorias")
@@ -38,7 +38,7 @@ def dashboard():
         # Total general de reportes
         total_reportes = sum(row['total'] for row in totals_by_cat) if totals_by_cat else 0
 
-        # 🔹 3) Combinar nombre + total + porcentaje
+        # 3) Combinar nombre + total + porcentaje
         categorias = []
         for row in totals_by_cat:
             cid = str(row['categoria_id'])
@@ -235,6 +235,6 @@ def fallas_por_sede_categoria():
         return jsonify(respuesta)
 
     except Exception as e:
-        print("❌ Error en la consulta:", e)
+        print(" Error en la consulta:", e)
         return jsonify({"error": "No se pudieron obtener los datos", "detalle": str(e)}), 500
 
