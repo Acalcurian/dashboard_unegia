@@ -4,7 +4,7 @@ from conexion import (
     obtener_conexion_categorias,
     obtener_conexion_reportes_generales
 )
-
+import psycopg2.extras
 
 
 dashboard_bp = Blueprint('dashboard', __name__)
@@ -14,7 +14,7 @@ def dashboard():
     try:
         # 1) Contar totales por categoría en reportes_generales
         conexion_r = obtener_conexion_reportes_generales()
-        cur_r = conexion_r.cursor(dictionary=True)
+        cur_r = conexion_r.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur_r.execute("""
             SELECT categoria AS categoria_id, COUNT(*) AS total
             FROM reportes
@@ -26,7 +26,7 @@ def dashboard():
 
         # 2) Obtener nombres de categorías desde categorias_fallas
         conexion_cat = obtener_conexion_categorias()
-        cur_cat = conexion_cat.cursor(dictionary=True)
+        cur_cat = conexion_cat.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur_cat.execute("SELECT id, nombre FROM categorias")
         categorias_data = cur_cat.fetchall()
         cur_cat.close()
@@ -78,7 +78,7 @@ def dashboard():
 def api_categoria_total(categoria_id):
     try:
         conexion = obtener_conexion_reportes_generales()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute("SELECT COUNT(*) AS total FROM reportes WHERE categoria = %s", (categoria_id,))
         row = cursor.fetchone()
         cursor.close()
@@ -94,7 +94,7 @@ def api_categoria_total(categoria_id):
 def api_categorias_totales():
     try:
         conexion = obtener_conexion_reportes_generales()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute("SELECT categoria AS categoria_id, COUNT(*) AS total FROM reportes GROUP BY categoria")
         totals = cursor.fetchall()
         cursor.close()
@@ -110,7 +110,7 @@ def api_fallas_por_categoria():
     try:
         # 1) Obtener todos los reportes (solo los campos necesarios)
         conn_rep = obtener_conexion_reportes_generales()
-        cur_rep = conn_rep.cursor(dictionary=True)
+        cur_rep = conn_rep.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur_rep.execute("""
             SELECT categoria
             FROM reportes
@@ -131,7 +131,7 @@ def api_fallas_por_categoria():
 
         # 3) Obtener nombres de categorias desde la base categorias_fallas
         conn_cat = obtener_conexion_categorias()
-        cur_cat = conn_cat.cursor(dictionary=True)
+        cur_cat = conn_cat.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur_cat.execute("SELECT id, nombre FROM categorias")
         categorias_data = cur_cat.fetchall()
         cur_cat.close()
@@ -162,79 +162,85 @@ def api_fallas_por_categoria():
 
 @dashboard_bp.route('/api/fallas_por_sede_categoria')
 def fallas_por_sede_categoria():
-    from conexion import obtener_conexion_reportes_generales
+    from conexion import obtener_conexion_reportes_generales, obtener_conexion, obtener_conexion_categorias
     try:
-        con = obtener_conexion_reportes_generales()
-        cur = con.cursor(dictionary=True)
+        # 1. Obtener los nombres de Sedes y Categorías de sus DBs (Consultas Separadas)
+        
+        # Conexión 1: Sedes (asumiendo que obtener_conexion va a la DB de sedes)
+        conn_sede = obtener_conexion() 
+        cur_sede = conn_sede.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur_sede.execute("SELECT id, nombre FROM sedes")
+        sedes_data = cur_sede.fetchall()
+        cur_sede.close()
+        conn_sede.close()
+        map_sedes = {s['id']: s['nombre'] for s in sedes_data}
+        sedes_list = sorted(map_sedes.values())
 
-        # --- Prueba 1: Verificar si la tabla existe ---
-        cur.execute("SHOW TABLES;")
-        tablas = [t[list(t.keys())[0]] for t in cur.fetchall()]
-        print("Tablas encontradas:", tablas)
+        # Conexión 2: Categorías
+        conn_cat = obtener_conexion_categorias()
+        cur_cat = conn_cat.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur_cat.execute("SELECT id, nombre FROM categorias")
+        categorias_data = cur_cat.fetchall()
+        cur_cat.close()
+        conn_cat.close()
+        map_categorias = {c['id']: c['nombre'] for c in categorias_data}
+        categorias_list = sorted(map_categorias.values())
 
-        # --- Prueba 2: Intentar consultar con nombres comunes ---
-        consulta =consulta = """
-            SELECT 
-                s.nombre AS sede, 
-                c.nombre AS categoria, 
-                COUNT(r.id) AS cantidad
-            FROM 
-                reportes r
-            JOIN 
-                sedes_uneg.sedes s 
-                ON r.sede = s.id  -- Asumo que 'r.sede' en reportes es el ID de la sede
-            JOIN 
-                categorias_fallas.categorias c 
-                ON r.categoria = c.id -- Asumo que 'r.categoria' en reportes es el ID de la categoría
-            GROUP BY 
-                s.nombre, c.nombre
-            ORDER BY 
-                s.nombre, c.nombre;
-        """
-        cur.execute(consulta)
-        resultados = cur.fetchall()
+        # 2. Obtener los conteos (IDs) de la DB de Reportes
+        
+        conn_rep = obtener_conexion_reportes_generales()
+        cur_rep = conn_rep.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        
+        # Consulta de conteo SIMPLE (solo IDs, sin JOINS)
+        cur_rep.execute("""
+            SELECT sede, categoria, COUNT(id) AS cantidad
+            FROM reportes
+            WHERE sede IS NOT NULL AND categoria IS NOT NULL
+            GROUP BY sede, categoria;
+        """)
+        raw_conteo = cur_rep.fetchall()
+        cur_rep.close()
+        conn_rep.close()
 
-        print("Ejemplo de fila:", resultados[:3])  # ← imprimirá en consola Flask
+        # 3. Procesar y Mapear los datos en Python
+        
+        datos_agrupados = {} # Estructura: {nombre_categoria: {nombre_sede: cantidad}}
 
-        datos_agrupados = {}
-        sedes = set()
-        categorias = set()
-
-        for fila in resultados:
-            sede = fila["sede"]
-            categoria = fila["categoria"]
+        for fila in raw_conteo:
+            # Usamos los mapas creados para obtener los nombres
+            sede_nombre = map_sedes.get(fila["sede"], f"Sede ID {fila['sede']}")
+            categoria_nombre = map_categorias.get(fila["categoria"], f"Cat ID {fila['categoria']}")
             cantidad = fila["cantidad"]
 
-            sedes.add(sede)
-            categorias.add(categoria)
+            if categoria_nombre not in datos_agrupados:
+                datos_agrupados[categoria_nombre] = {}
+            
+            datos_agrupados[categoria_nombre][sede_nombre] = cantidad
 
-            if categoria not in datos_agrupados:
-                datos_agrupados[categoria] = {}
-            datos_agrupados[categoria][sede] = cantidad
-
-        sedes_list = sorted(list(sedes))
-        categorias_list = sorted(list(categorias))
-
+        # 4. Construir la Respuesta Final
+        
         respuesta = {
-            "sedes": sedes_list,
+            "sedes": sedes_list, # Lista de nombres de sedes
             "categorias": []
         }
 
+        # Iterar sobre las categorías (asegurando 0 si no hay reportes)
         for categoria in categorias_list:
             datos_por_sede = {}
             for sede in sedes_list:
-                datos_por_sede[sede] = datos_agrupados.get(categoria, {}).get(sede, 0)
+                cantidad = datos_agrupados.get(categoria, {}).get(sede, 0)
+                datos_por_sede[sede] = cantidad
+            
             respuesta["categorias"].append({
                 "nombre": categoria,
                 "datosPorSede": datos_por_sede
             })
 
-        cur.close()
-        con.close()
-
         return jsonify(respuesta)
 
     except Exception as e:
-        print(" Error en la consulta:", e)
-        return jsonify({"error": "No se pudieron obtener los datos", "detalle": str(e)}), 500
+        # Se muestra el error detallado si falla
+        current_app.logger.exception("Error en fallas_por_sede_categoria:")
+        print(" Error en la consulta/proceso:", e)
+        return jsonify({"error": "No se pudieron obtener los datos de la gráfica.", "detalle": str(e)}), 500
 

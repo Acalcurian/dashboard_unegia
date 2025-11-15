@@ -8,6 +8,7 @@ from conexion import obtener_conexion, obtener_conexion_categorias, obtener_cone
 from dashboard_router import dashboard_bp
 from dotenv import load_dotenv
 import requests
+import psycopg2.extras
 
 
 # Cargar variables del archivo .env
