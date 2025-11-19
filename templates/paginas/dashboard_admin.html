@@ -22,15 +22,15 @@
         <h3 class="text-white mb-4">Administrador</h3>
 
         <a href="{{ url_for('dashboard_admin') }}" class="d-block text-white mt-3">
-            📩 Correos
+             Correos
         </a>
 
         <a href="#" class="d-block text-white mt-3">
-            🛠️ Reportes
+             Reportes
         </a>
 
         <a href="#" class="d-block text-white mt-3">
-            📊 Indicadores
+            Indicadores
         </a>
     </div>
 
@@ -41,9 +41,9 @@
 
         <!-- Filtros -->
         <div class="mb-3">
-            <button class="btn btn-secondary" onclick="filtrar('todos')">Todos</button>
-            <button class="btn btn-success" onclick="filtrar('confirmados')">Confirmados</button>
-            <button class="btn btn-danger" onclick="filtrar('no_confirmados')">No confirmados</button>
+            <a href="/dashboard_admin" class="btn btn-success">Todos</a>
+            <a href="/dashboard_admin/confirmados" class="btn btn-primary">Confirmados</a>
+            <a href="/dashboard_admin/no_confirmados" class="btn btn-danger">No confirmados</a>
         </div>
 
         <div class="card shadow-sm">
@@ -90,7 +90,7 @@
                             <td>
                                 {% if not correo.estatus_solucion %}
                                 <button class="btn btn-warning btn-sm"
-                                        onclick="marcarSolucionado({{correos.id }})">
+                                        onclick="marcarSolucionado({{correo.id}})">
                                     Marcar solucionado
                                 </button>
                                 {% else %}

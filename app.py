@@ -589,13 +589,17 @@ def dashboard_admin():
     conexion = obtener_conexion_departamentos_db()
     cursor = conexion.cursor()
 
-    cursor.execute("SELECT id, reporte_id, cedula, destinatario, asunto, mensaje, foto_path, estatus_confirmacion, estatus_solucion FROM correos_enviados ORDER BY id DESC")
+    cursor.execute("""
+        SELECT id, reporte_id, cedula, destinatario, asunto, mensaje, foto_path,
+               estatus_confirmacion, estatus_solucion
+        FROM correos_enviados
+        ORDER BY id DESC
+    """)
 
     correos = cursor.fetchall()
     cursor.close()
     conexion.close()
 
-    # Convertimos la tupla a dict para Jinja
     lista = []
     for c in correos:
         lista.append({
@@ -611,6 +615,7 @@ def dashboard_admin():
         })
 
     return render_template("paginas/dashboard_admin.html", correos=lista)
+
 
 
 
@@ -634,6 +639,79 @@ def marcar_solucionado(correo_id):
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+    
+
+
+
+
+@app.route('/dashboard_admin/confirmados')
+def dashboard_admin_confirmados():
+    conexion = obtener_conexion_departamentos_db()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        SELECT id, reporte_id, cedula, destinatario, asunto, mensaje, foto_path,
+               estatus_confirmacion, estatus_solucion
+        FROM correos_enviados
+        WHERE estatus_confirmacion = TRUE
+        ORDER BY id DESC
+    """)
+
+    correos = cursor.fetchall()
+    cursor.close()
+    conexion.close()
+
+    lista = []
+    for c in correos:
+        lista.append({
+            "id": c[0],
+            "reporte_id": c[1],
+            "cedula": c[2],
+            "destinatario": c[3],
+            "asunto": c[4],
+            "mensaje": c[5],
+            "foto_path": c[6],
+            "estatus_confirmacion": c[7],
+            "estatus_solucion": c[8],
+        })
+
+    return render_template("paginas/dashboard_admin.html", correos=lista)
+
+
+
+@app.route('/dashboard_admin/no_confirmados')
+def dashboard_admin_no_confirmados():
+    conexion = obtener_conexion_departamentos_db()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        SELECT id, reporte_id, cedula, destinatario, asunto, mensaje, foto_path,
+               estatus_confirmacion, estatus_solucion
+        FROM correos_enviados
+        WHERE estatus_confirmacion = FALSE
+        ORDER BY id DESC
+    """)
+
+    correos = cursor.fetchall()
+    cursor.close()
+    conexion.close()
+
+    lista = []
+    for c in correos:
+        lista.append({
+            "id": c[0],
+            "reporte_id": c[1],
+            "cedula": c[2],
+            "destinatario": c[3],
+            "asunto": c[4],
+            "mensaje": c[5],
+            "foto_path": c[6],
+            "estatus_confirmacion": c[7],
+            "estatus_solucion": c[8],
+        })
+
+    return render_template("paginas/dashboard_admin.html", correos=lista)
+
 
 
 # -----------------------------------------------------
