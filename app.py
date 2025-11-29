@@ -201,6 +201,9 @@ def enviar_reporte():
     foto = request.files.get('foto_path')
     descripcion = request.form.get('descripcion')
 
+    lat_foto = None
+    lon_foto = None
+
 
     upload_folder = os.path.join(app.root_path, 'static', 'uploads')
     os.makedirs(upload_folder, exist_ok=True)
@@ -214,6 +217,7 @@ def enviar_reporte():
         foto.save(ruta_foto_completa)
         foto_path = f"uploads/{nombre_foto}"
 
+
     try:
         conexion = obtener_conexion_reportes_generales()
         cursor = conexion.cursor()
@@ -225,7 +229,7 @@ def enviar_reporte():
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
 
-        # ⬅️ COLOCAMOS LOS VALORES SIN CAMBIAR NADA MÁS
+        # ⬅️ COLOCAMOS LOS VALORES SIN CAMBIAR NADA MÁS 
         valores = (
             cedula, categoria_id, falla_id, otra_falla, 
             sede_id, foto_path, descripcion, lat_foto, lon_foto
@@ -455,31 +459,64 @@ def api_enviar_correo():
     data = request.json
 
     try:
-        # Datos del reporte
+        # Datos recibidos del frontend
         cedula = data.get('cedula')
         categoria_id = data.get('categoria_id')
         falla_id = data.get('falla_id')
         sede_id = data.get('sede_id')
         descripcion = data.get('descripcion')
         foto_path = data.get('foto_path')
-        reporte_id = data.get('reporte_id')  # Opcional, si lo envías desde el frontend
+        reporte_id = data.get('reporte_id')
 
         destinatario = "acalcurian671@gmail.com"
         asunto = "Nuevo Reporte Registrado"
 
-        # ------------------------------------------------------
-        # Guardar primero el correo en la base de datos
-        # ------------------------------------------------------
-        correo_id = None
-        try:
-            conexion = obtener_conexion_departamentos_db()
-            cursor = conexion.cursor()
+        # --------------------------------------------------------
+        # 1. OBTENER NOMBRE DE LA CATEGORÍA
+        # --------------------------------------------------------
+        conexion_cat = obtener_conexion_categorias()
+        cursor_cat = conexion_cat.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+        cursor_cat.execute("SELECT nombre FROM categorias WHERE id = %s", (categoria_id,))
+        categoria_nombre = cursor_cat.fetchone()
+        categoria_nombre = categoria_nombre["nombre"] if categoria_nombre else "No encontrado"
+
+        # --------------------------------------------------------
+        # 2. OBTENER NOMBRE DE LA FALLA
+        # --------------------------------------------------------
+        cursor_cat.execute("SELECT descripcion FROM fallas WHERE id = %s", (falla_id,))
+        falla_nombre = cursor_cat.fetchone()
+        falla_nombre = falla_nombre["descripcion"] if falla_nombre else "No encontrado"
+
+        cursor_cat.close()
+        conexion_cat.close()
+
+        # --------------------------------------------------------
+        # 3. OBTENER NOMBRE DE LA SEDE
+        # --------------------------------------------------------
+        conexion_sede = obtener_conexion()
+        cursor_sede = conexion_sede.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        cursor_sede.execute("SELECT nombre FROM sedes WHERE id = %s", (sede_id,))
+        sede_nombre = cursor_sede.fetchone()
+        sede_nombre = sede_nombre["nombre"] if sede_nombre else "No encontrado"
+
+        cursor_sede.close()
+        conexion_sede.close()
+
+        # --------------------------------------------------------
+        # 4. GUARDAR REGISTRO DEL CORREO EN BD
+        # --------------------------------------------------------
+        conexion = obtener_conexion_departamentos_db() 
+        cursor = conexion.cursor()
+        correo_id = None
+
+        try:
             sql = """
-            INSERT INTO correos_enviados 
-            (reporte_id, cedula, destinatario, asunto, mensaje, foto_path, estatus_confirmacion)
-            VALUES (%s, %s, %s, %s, %s, %s, FALSE)
-            RETURNING id
+                INSERT INTO correos_enviados 
+                (reporte_id, cedula, destinatario, asunto, mensaje, foto_path, estatus_confirmacion)
+                VALUES (%s, %s, %s, %s, %s, %s, FALSE)
+                RETURNING id
             """
             valores = (
                 reporte_id,
@@ -491,44 +528,47 @@ def api_enviar_correo():
             )
 
             cursor.execute(sql, valores)
-            correo_id = cursor.fetchone()[0]  # ✅ Obtenemos el ID del correo
+            correo_id = cursor.fetchone()[0]
             conexion.commit()
-            cursor.close()
-            conexion.close()
-            print(f" Registro guardado en correos_enviados correctamente (ID: {correo_id})")
 
         except Exception as db_error:
-            print(f" Error al guardar correo en la base de datos: {db_error}")
+            print("Error al guardar correo:", db_error)
 
-        # ------------------------------------------------------
-        # Construcción del correo
-        # ------------------------------------------------------
+        cursor.close()
+        conexion.close()
+
+        # --------------------------------------------------------
+        # 5. CREACIÓN DEL CORREO HTML
+        # --------------------------------------------------------
         msg = Message(
             subject=asunto,
             recipients=[destinatario],
         )
 
-        # Cuerpo con botón de confirmación que incluye el ID real
         msg.html = f"""
         <h2>📋 Nuevo reporte recibido</h2>
+
         <p><b>Cédula:</b> {cedula}</p>
-        <p><b>Categoría:</b> {categoria_id}</p>
-        <p><b>Falla:</b> {falla_id}</p>
-        <p><b>Sede:</b> {sede_id}</p>
+        <p><b>Categoría:</b> {categoria_nombre}</p>
+        <p><b>Falla:</b> {falla_nombre}</p>
+        <p><b>Sede:</b> {sede_nombre}</p>
         <p><b>Descripción:</b> {descripcion}</p>
+
         <br>
         {'<img src="cid:foto_reporte">' if foto_path else '<p>Sin imagen adjunta</p>'}
-        <br>
-        <p>Por favor confirma la recepción del correo:</p>
+
+        <br><br>
+        <p>Confirma que recibiste este correo:</p>
         <a href="http://127.0.0.1:5000/confirmar_recepcion?correo_id={correo_id}" 
            style="background-color:#4CAF50;color:white;padding:10px 20px;
-           text-decoration:none;border-radius:5px;">Confirmar Recepción ✅</a>
+           text-decoration:none;border-radius:5px;">
+           Confirmar Recepción ✅
+        </a>
         """
 
-
-        
-
-        # Adjuntar imagen si existe
+        # --------------------------------------------------------
+        # 6. ADJUNTAR FOTO SI EXISTE
+        # --------------------------------------------------------
         if foto_path:
             with app.open_resource(os.path.join('static', foto_path)) as fp:
                 msg.attach(
@@ -539,15 +579,19 @@ def api_enviar_correo():
                     headers={"Content-ID": "<foto_reporte>"}
                 )
 
-        # Enviar el correo
+        # --------------------------------------------------------
+        # 7. ENVIAR CORREO
+        # --------------------------------------------------------
         mail.send(msg)
         print("Correo enviado correctamente")
 
-        return jsonify({"success": True, "message": "Correo enviado y registrado correctamente"}), 200
+        return jsonify({"success": True, "message": "Correo enviado correctamente"}), 200
 
     except Exception as e:
         print(f"Error al enviar correo: {e}")
         return jsonify({"success": False, "message": str(e)}), 500
+
+
 
     
 
