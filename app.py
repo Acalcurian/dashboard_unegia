@@ -9,6 +9,8 @@ from dashboard_router import dashboard_bp
 from dotenv import load_dotenv
 import requests
 import psycopg2.extras
+from PIL import Image
+from PIL.ExifTags import TAGS, GPSTAGS
 
 
 # Cargar variables del archivo .env
@@ -189,7 +191,6 @@ def reportes():
 # -----------------------------------------------------
 # ENVIAR REPORTE
 # -----------------------------------------------------
-
 @app.route('/enviar_reporte', methods=['POST'])
 def enviar_reporte():
     cedula = request.form.get('cedula')
@@ -200,9 +201,6 @@ def enviar_reporte():
     foto = request.files.get('foto_path')
     descripcion = request.form.get('descripcion')
 
-    # ⬅️ SE AGREGAN ESTAS DOS LÍNEAS
-    lat_foto = request.form.get("latitud")
-    lon_foto = request.form.get("longitud")
 
     upload_folder = os.path.join(app.root_path, 'static', 'uploads')
     os.makedirs(upload_folder, exist_ok=True)
@@ -261,8 +259,6 @@ def enviar_reporte():
         print(f"Error al guardar reporte: {e}")
 
     return redirect(url_for('index', categoria_id=categoria_id))
-
-
 
 # -----------------------------------------------------
 # EDITAR REPORTE

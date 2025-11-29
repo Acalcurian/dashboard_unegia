@@ -31,7 +31,7 @@
                 <div class="col-md-6">
                     <div class="card shadow p-4 rounded-4">
 
-                        <!-- ✅ Aquí empieza el formulario correcto -->
+                        <!--Aquí empieza el formulario correcto -->
                         <form action="{{ url_for('enviar_reporte') }}" method="POST" enctype="multipart/form-data">
                             
                             <div class="mb-3">
@@ -92,12 +92,6 @@
                             >
                         </div>
 
-
-                            
-
-                           
-
-                           
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Sede</label>
                                 <select class="form-select" id="sede" name="sede" required>
@@ -112,16 +106,6 @@
                                 <label class="form-label fw-semibold">Evidencia fotográfica</label>
                                 <input type="file" class="form-control" id="foto" name="foto_path" accept="image/*" required>
                             </div>
-
-                            <button id="btnUbicacion" type="button" onclick="obtenerUbicacion()" 
-                                    class="btn btn-warning">
-                                    Cargar ubicación
-                            </button>
-
-                            <input type="hidden" id="latitud" name="latitud">
-                            <input type="hidden" id="longitud" name="longitud">
-
-                            <p id="ubicacion-status" style="margin-top:10px; font-weight:bold;"></p>
 
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Descripción</label>
