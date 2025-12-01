@@ -52,17 +52,17 @@
                 <table class="table table-bordered table-hover text-center" id="tablaCorreos">
                     <thead class="table-dark">
                         <tr>
-                            <th>ID</th>
+                            <th>Fecha</th>
                             <th>Cédula</th>
                             <th>Destinatario</th>
-                            <th>Confirmado</th>
+                            <th>Estatus</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         {% for correo in correos %}
                         <tr>
-                            <td>{{ correo.id }}</td>
+                            <td>{{  correo.fecha_envio.strftime('%d/%m/%Y') }}</td>
                             <td>{{ correo.cedula }}</td>
                             <td>{{ correo.destinatario }}</td>
 

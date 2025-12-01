@@ -639,7 +639,7 @@ def dashboard_admin():
     cursor = conexion.cursor()
 
     cursor.execute("""
-        SELECT id, reporte_id, cedula, destinatario, asunto, mensaje, foto_path,
+        SELECT fecha_envio, reporte_id, cedula, destinatario, asunto, mensaje, foto_path,
                estatus_confirmacion, estatus_solucion
         FROM correos_enviados
         ORDER BY id DESC
@@ -652,7 +652,7 @@ def dashboard_admin():
     lista = []
     for c in correos:
         lista.append({
-            "id": c[0],
+            "fecha_envio": c[0],
             "reporte_id": c[1],
             "cedula": c[2],
             "destinatario": c[3],
