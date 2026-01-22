@@ -78,7 +78,11 @@
                             </td>
                             
                             <td>
-                                <button type="submit" class="btn btn-primary btn-lg px-2 py-2 rounded-pill">Solicion IA</button>
+                                <a href="#"
+                                    target="_blank"
+                                    class="btn btn-primary btn-sm">
+                                    Solucion IA
+                                </a>
                                 <a href="https://www.google.com/maps?q={{ r.latitud }},{{ r.longitud }}"
                                     target="_blank"
                                     class="btn btn-primary btn-sm">
@@ -121,7 +125,13 @@
                     <tbody>
                         {% for correo in correos %}
                         <tr>
-                            <td>{{ correo.fecha_envio.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                {% if correo.fecha_envio is defined %}
+                                    {{ correo.fecha_envio.strftime('%d/%m/%Y') }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
                             <td>{{ correo.cedula }}</td>
                             <td>{{ correo.destinatario }}</td>
                             <td>
