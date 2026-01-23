@@ -17,7 +17,7 @@ server {
 
     # Serve static files directly through Nginx for better performance
     location /static {
-        alias /path/to/your/dashboard_unegia/static;
+        alias /path/to/your/dashboard_unegia/static/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
