@@ -1,468 +1,543 @@
 # Dashboard UNEGIA
 
-Flask-based dashboard application for managing infrastructure reports at Universidad Nacional Experimental de Guayana (UNEG).
+Aplicación web basada en Flask para gestionar reportes de infraestructura en la Universidad Nacional Experimental de Guayana (UNEG).
 
-## Project Overview
+## Descripción del Proyecto
 
-This web application allows users to:
-- Report infrastructure issues across different categories (electrical, plumbing, refrigeration, security, infrastructure, furniture, supplies, and technology)
-- Upload photos and descriptions of issues
-- Track report status via email notifications
-- View admin dashboards with comprehensive reporting analytics
-- Manage reports across multiple campus locations
+Esta aplicación web permite a los usuarios:
+- Reportar problemas de infraestructura en diferentes categorías (eléctrico, plomería, refrigeración, seguridad, infraestructura, mobiliario, suministros y tecnología)
+- Subir fotos y descripciones de los problemas
+- Rastrear el estado de los reportes mediante notificaciones por correo electrónico
+- Ver paneles de administración con análisis completos de reportes
+- Gestionar reportes en múltiples sedes del campus
 
-## Features
+## Características
 
-- **Multi-category reporting system**: 8 categories for different types of infrastructure issues
-- **Photo upload support**: Upload images up to 500MB
-- **Email notifications**: Automated email notifications with confirmation tracking
-- **Admin dashboard**: Comprehensive analytics and reporting views
-- **Multi-database architecture**: Separate databases for sedes, categories, reports, and departments
+- **Sistema de reportes multi-categoría**: 8 categorías para diferentes tipos de problemas de infraestructura
+- **Soporte para carga de fotos**: Subida de imágenes de hasta 500MB
+- **Notificaciones por correo**: Notificaciones automáticas por email con seguimiento de confirmación
+- **Panel de administración**: Vistas completas de análisis y reportes
+- **Arquitectura multi-base de datos**: Bases de datos separadas para sedes, categorías, reportes y departamentos
 
-## Prerequisites
+## Requisitos Previos
 
-Before deploying this application, ensure you have the following installed on your server:
+Antes de desplegar esta aplicación, asegúrese de tener instalado lo siguiente en su servidor:
 
-- **Python**: 3.8 or higher
-- **PostgreSQL**: 12 or higher (with 4 separate databases configured)
-- **PM2**: Process manager for Node.js applications
-- **Nginx**: Web server and reverse proxy
-- **Git**: For cloning the repository
-- **pip**: Python package manager
+- **Python**: 3.8 o superior
+- **PostgreSQL**: 12 o superior (con 4 bases de datos separadas configuradas)
+- **PM2**: Gestor de procesos para aplicaciones Node.js
+- **Nginx**: Servidor web y proxy inverso
+- **Git**: Para clonar el repositorio
+- **pip**: Gestor de paquetes de Python
 
-### System Setup
+### Configuración del Sistema
 
 ```bash
-# Update system packages
+# Actualizar paquetes del sistema
 sudo apt update && sudo apt upgrade -y
 
-# Install Python and pip
+# Instalar Python y pip
 sudo apt install python3 python3-pip python3-venv -y
 
-# Install PostgreSQL
+# Instalar PostgreSQL
 sudo apt install postgresql postgresql-contrib -y
 
-# Install Nginx
+# Instalar Nginx
 sudo apt install nginx -y
 
-# Install Node.js and PM2
+# Instalar Node.js y PM2
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 sudo apt install nodejs -y
 sudo npm install -g pm2
 ```
 
-## Installation & Deployment
+## Instalación y Despliegue
 
-### 1. Clone the Repository
+### 1. Clonar el Repositorio
 
 ```bash
-cd /path/to/your/projects
+cd /ruta/a/sus/proyectos
 git clone https://github.com/SISTEMATIZACION-UNEG/dashboard_unegia.git
 cd dashboard_unegia
 ```
 
-### 2. Create and Activate Virtual Environment
+### 2. Crear y Activar Entorno Virtual
 
 ```bash
-# Create virtual environment
+# Crear entorno virtual
 python3 -m venv venv
 
-# Activate virtual environment
+# Activar entorno virtual
 source venv/bin/activate
 
-# Verify activation (should show path to venv/bin/python)
+# Verificar activación (debería mostrar la ruta a venv/bin/python)
 which python
 ```
 
-### 3. Install Dependencies
+### 3. Instalar Dependencias
 
 ```bash
-# Install all required packages
+# Instalar todos los paquetes requeridos
 pip install -r requirements.txt
 
-# Verify installation
+# Verificar instalación
 pip list
 ```
 
-### 4. Configure Environment Variables
+### 4. Configurar Variables de Entorno
 
-Create a `.env` file in the project root with your configuration:
+Crear un archivo `.env` en la raíz del proyecto con su configuración:
 
 ```bash
-# Copy the example file if available, or create new
+# Copiar el archivo de ejemplo si está disponible, o crear uno nuevo
 touch .env
 ```
 
-Add the following variables to your `.env` file:
+Agregar las siguientes variables a su archivo `.env`:
 
 ```env
-# Email Configuration
+# Configuración de Email
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USE_TLS=True
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-specific-password
+MAIL_USERNAME=su-email@gmail.com
+MAIL_PASSWORD=su-contraseña-de-aplicación
 
-# Flask Configuration
+# Configuración de Flask
 FLASK_ENV=production
-SECRET_KEY=your-secret-key-here-change-this
+SECRET_KEY=su-clave-secreta-aquí-cámbiela
 ```
 
-### 5. Configure Database Connection
+### 5. Configurar Conexión a Base de Datos
 
-Create a `config.py` file with your database credentials:
+Crear un archivo `config.py` con sus credenciales de base de datos:
 
 ```python
 DATABASES = {
     "sedes_uneg": {
         "host": "localhost",
         "database": "sedes_uneg",
-        "user": "your_db_user",
-        "password": "your_db_password",
+        "user": "su_usuario_db",
+        "password": "su_contraseña_db",
         "port": 5432
     },
     "categorias_fallas": {
         "host": "localhost",
         "database": "categorias_fallas",
-        "user": "your_db_user",
-        "password": "your_db_password",
+        "user": "su_usuario_db",
+        "password": "su_contraseña_db",
         "port": 5432
     },
     "reportes_generales": {
         "host": "localhost",
         "database": "reportes_generales",
-        "user": "your_db_user",
-        "password": "your_db_password",
+        "user": "su_usuario_db",
+        "password": "su_contraseña_db",
         "port": 5432
     },
     "departamentos_db": {
         "host": "localhost",
         "database": "departamentos_db",
-        "user": "your_db_user",
-        "password": "your_db_password",
+        "user": "su_usuario_db",
+        "password": "su_contraseña_db",
         "port": 5432
     }
 }
 ```
 
-**Important**: Never commit this file to version control. It's already listed in `.gitignore`.
+**Importante**: Nunca haga commit de este archivo al control de versiones. Ya está listado en `.gitignore`.
 
-### 6. Set Up Database Tables
+### 6. Configurar Bases de Datos y Ejecutar Migraciones
 
-Ensure your PostgreSQL databases have the required tables. Connect to each database and create necessary tables:
+Este proyecto utiliza **migraciones SQL manuales** en lugar de Flask-Migrate/Alembic, ya que usa conexiones directas con psycopg2 (no SQLAlchemy ORM).
 
-```sql
--- Example for reportes_generales database
-CREATE TABLE reportes (
-    id SERIAL PRIMARY KEY,
-    cedula VARCHAR(20),
-    categoria INTEGER,
-    tipo_falla INTEGER,
-    fallas_otros TEXT,
-    sede INTEGER,
-    foto_path VARCHAR(255),
-    descripcion TEXT,
-    lat_foto DECIMAL(10, 8),
-    lon_foto DECIMAL(11, 8),
-    fecha_reporte TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Additional tables for other databases...
-```
-
-### 7. Create Logs Directory
+#### Crear las Bases de Datos
 
 ```bash
-# Create directory for PM2 logs
+# Conectar a PostgreSQL
+sudo -u postgres psql
+
+# Crear las 4 bases de datos
+CREATE DATABASE sedes_uneg;
+CREATE DATABASE categorias_fallas;
+CREATE DATABASE reportes_generales;
+CREATE DATABASE departamentos_db;
+
+# Crear usuario (si es necesario)
+CREATE USER dashboard_user WITH PASSWORD 'su_contraseña_segura';
+
+# Otorgar permisos
+GRANT ALL PRIVILEGES ON DATABASE sedes_uneg TO dashboard_user;
+GRANT ALL PRIVILEGES ON DATABASE categorias_fallas TO dashboard_user;
+GRANT ALL PRIVILEGES ON DATABASE reportes_generales TO dashboard_user;
+GRANT ALL PRIVILEGES ON DATABASE departamentos_db TO dashboard_user;
+
+# Salir
+\q
+```
+
+#### Ejecutar Migraciones Iniciales
+
+El proyecto incluye scripts automatizados para gestionar las migraciones de base de datos:
+
+```bash
+# Navegar al directorio de scripts
+cd scripts/db
+
+# Ejecutar migraciones en todas las bases de datos
+./run_migrations.sh -d all -u dashboard_user -P su_contraseña
+
+# O usar variables de entorno
+export DB_USER=dashboard_user
+export DB_PASSWORD=su_contraseña
+./run_migrations.sh -d all
+```
+
+Para más información sobre el sistema de migraciones, consulte la [Guía de Scripts de Base de Datos](scripts/README_SCRIPTS.md).
+
+### 7. Crear Directorio de Logs
+
+```bash
+# Crear directorio para logs de PM2
 mkdir -p logs
 ```
 
-### 8. Configure PM2
+### 8. Configurar PM2
 
-The `ecosystem.config.js` file is already configured. Update the `cwd` path if your installation directory differs:
+El archivo `ecosystem.config.js` ya está configurado. Actualice la ruta `cwd` si su directorio de instalación es diferente:
 
 ```bash
-# Edit ecosystem.config.js and update the cwd path to match your installation
+# Editar ecosystem.config.js y actualizar la ruta cwd para que coincida con su instalación
 nano ecosystem.config.js
 ```
 
-Start the application with PM2:
+Iniciar la aplicación con PM2:
 
 ```bash
-# Start the application
+# Iniciar la aplicación
 pm2 start ecosystem.config.js
 
-# Save PM2 configuration
+# Guardar configuración de PM2
 pm2 save
 
-# Set PM2 to start on system boot
+# Configurar PM2 para iniciar al arranque del sistema
 pm2 startup
-# Follow the instructions provided by the command above
+# Seguir las instrucciones proporcionadas por el comando anterior
 ```
 
-### 9. Configure Nginx
+### 9. Configurar Nginx
 
-Copy the example Nginx configuration:
+Copiar la configuración de ejemplo de Nginx:
 
 ```bash
-# Copy the example configuration
+# Copiar la configuración de ejemplo
 sudo cp nginx.conf.example /etc/nginx/sites-available/dashboard-unegia
 
-# Edit the configuration file
+# Editar el archivo de configuración
 sudo nano /etc/nginx/sites-available/dashboard-unegia
 ```
 
-Update the following in the Nginx configuration:
-- `server_name`: Replace with your domain or server IP
-- Static files path: Ensure it matches your installation directory
-- Proxy settings: Verify the port matches your Gunicorn configuration (default: 5000)
+Actualizar lo siguiente en la configuración de Nginx:
+- `server_name`: Reemplazar con su dominio o IP del servidor
+- Ruta de archivos estáticos: Asegurar que coincida con su directorio de instalación
+- Configuración del proxy: Verificar que el puerto coincida con su configuración de Gunicorn (por defecto: 5000)
 
-Enable the site:
+Habilitar el sitio:
 
 ```bash
-# Create symbolic link to enable the site
+# Crear enlace simbólico para habilitar el sitio
 sudo ln -s /etc/nginx/sites-available/dashboard-unegia /etc/nginx/sites-enabled/
 
-# Test Nginx configuration
+# Probar configuración de Nginx
 sudo nginx -t
 
-# Reload Nginx
+# Recargar Nginx
 sudo systemctl reload nginx
 ```
 
-### 10. Configure Firewall (if applicable)
+### 10. Configurar Firewall (si aplica)
 
 ```bash
-# Allow HTTP and HTTPS traffic
+# Permitir tráfico HTTP y HTTPS
 sudo ufw allow 'Nginx Full'
 
-# Check firewall status
+# Verificar estado del firewall
 sudo ufw status
 ```
 
-## Managing the Application
+## Gestión de la Aplicación
 
-### PM2 Commands
+### Comandos de PM2
 
 ```bash
-# View application status
+# Ver estado de la aplicación
 pm2 status
 
-# View application logs
+# Ver logs de la aplicación
 pm2 logs dashboard-unegia
 
-# View only error logs
+# Ver solo logs de errores
 pm2 logs dashboard-unegia --err
 
-# View only output logs
+# Ver solo logs de salida
 pm2 logs dashboard-unegia --out
 
-# Restart the application
+# Reiniciar la aplicación
 pm2 restart dashboard-unegia
 
-# Stop the application
+# Detener la aplicación
 pm2 stop dashboard-unegia
 
-# Start the application
+# Iniciar la aplicación
 pm2 start dashboard-unegia
 
-# Delete the application from PM2
+# Eliminar la aplicación de PM2
 pm2 delete dashboard-unegia
 
-# Monitor application in real-time
+# Monitorear aplicación en tiempo real
 pm2 monit
 ```
 
-### Nginx Commands
+### Comandos de Nginx
 
 ```bash
-# Check Nginx status
+# Verificar estado de Nginx
 sudo systemctl status nginx
 
-# Start Nginx
+# Iniciar Nginx
 sudo systemctl start nginx
 
-# Stop Nginx
+# Detener Nginx
 sudo systemctl stop nginx
 
-# Restart Nginx
+# Reiniciar Nginx
 sudo systemctl restart nginx
 
-# Reload Nginx configuration
+# Recargar configuración de Nginx
 sudo systemctl reload nginx
 
-# Test Nginx configuration
+# Probar configuración de Nginx
 sudo nginx -t
 ```
 
-### Application Updates
+### Actualizaciones de la Aplicación
 
-To deploy updates:
+Para desplegar actualizaciones:
 
 ```bash
-# Navigate to project directory
-cd /path/to/your/dashboard_unegia
+# Navegar al directorio del proyecto
+cd /ruta/a/su/dashboard_unegia
 
-# Pull latest changes
+# Obtener últimos cambios
 git pull origin main
 
-# Activate virtual environment
+# Activar entorno virtual
 source venv/bin/activate
 
-# Install any new dependencies
+# Instalar nuevas dependencias
 pip install -r requirements.txt
 
-# Restart the application
+# Ejecutar nuevas migraciones (si hay)
+cd scripts/db
+./run_migrations.sh -d all -u dashboard_user -P su_contraseña
+cd ../..
+
+# Reiniciar la aplicación
 pm2 restart dashboard-unegia
 
-# Monitor for any issues
+# Monitorear posibles problemas
 pm2 logs dashboard-unegia
 ```
 
-## Project Structure
+## Gestión de Base de Datos
+
+### Sistema de Migraciones
+
+Este proyecto utiliza un sistema de migraciones SQL manuales. Para información detallada:
+
+- **Guía completa**: Ver [scripts/README_SCRIPTS.md](scripts/README_SCRIPTS.md)
+- **Archivos de migración**: `scripts/db/migrations/`
+- **Scripts disponibles**:
+  - `run_migrations.sh` - Ejecutar migraciones
+  - `export_data.sh` - Exportar/respaldar datos
+  - `import_data.sh` - Importar/restaurar datos
+
+### Ejemplos Rápidos
+
+**Crear respaldo de todas las bases de datos:**
+```bash
+cd scripts/db
+./export_data.sh -d all -u postgres -P contraseña
+```
+
+**Restaurar desde respaldo:**
+```bash
+cd scripts/db
+./import_data.sh -d all -i ../../exports/20240123_120000/ -u postgres -P contraseña
+```
+
+**Ejecutar una nueva migración:**
+```bash
+cd scripts/db
+./run_migrations.sh -d nombre_base_datos -u postgres -P contraseña
+```
+
+Para más detalles, consulte la [Guía de Scripts de Base de Datos](scripts/README_SCRIPTS.md).
+
+## Estructura del Proyecto
 
 ```
 dashboard_unegia/
-├── app.py                    # Main Flask application
-├── conexion.py              # Database connection handlers
-├── dashboard_router.py      # Dashboard blueprint and routes
-├── config.py               # Database configuration (not in repo)
-├── .env                    # Environment variables (not in repo)
-├── requirements.txt        # Python dependencies
-├── ecosystem.config.js     # PM2 configuration
-├── nginx.conf.example      # Nginx configuration example
-├── static/                 # Static files (CSS, JS, images)
-│   ├── dashboard/         # Dashboard assets
-│   └── uploads/           # User-uploaded files
-├── templates/             # HTML templates
-│   └── paginas/          # Application pages
-├── logs/                 # Application logs (created at runtime)
-└── venv/                # Virtual environment (not in repo)
+├── app.py                    # Aplicación principal de Flask
+├── conexion.py              # Manejadores de conexión a base de datos
+├── dashboard_router.py      # Blueprint y rutas del dashboard
+├── config.py               # Configuración de base de datos (no en repo)
+├── .env                    # Variables de entorno (no en repo)
+├── requirements.txt        # Dependencias de Python
+├── ecosystem.config.js     # Configuración de PM2
+├── nginx.conf.example      # Ejemplo de configuración de Nginx
+├── static/                 # Archivos estáticos (CSS, JS, imágenes)
+│   ├── dashboard/         # Assets del dashboard
+│   └── uploads/           # Archivos subidos por usuarios
+├── templates/             # Plantillas HTML
+│   └── paginas/          # Páginas de la aplicación
+├── scripts/              # Scripts de base de datos y utilidades
+│   ├── db/              # Scripts de base de datos
+│   │   ├── migrations/  # Archivos de migración SQL
+│   │   ├── run_migrations.sh
+│   │   ├── export_data.sh
+│   │   └── import_data.sh
+│   └── README_SCRIPTS.md # Guía de scripts
+├── exports/              # Respaldos de base de datos (generado)
+├── logs/                 # Logs de aplicación (creado en tiempo de ejecución)
+└── venv/                # Entorno virtual (no en repo)
 ```
 
-## Troubleshooting
+## Solución de Problemas
 
-### Application won't start
+### La aplicación no inicia
 
-1. **Check PM2 logs**:
+1. **Verificar logs de PM2**:
    ```bash
    pm2 logs dashboard-unegia
    ```
 
-2. **Verify virtual environment**:
+2. **Verificar entorno virtual**:
    ```bash
    source venv/bin/activate
    which python
    pip list
    ```
 
-3. **Check database connections**:
-   - Verify PostgreSQL is running: `sudo systemctl status postgresql`
-   - Test database credentials in `config.py`
-   - Check if all 4 databases exist and are accessible
+3. **Verificar conexiones a base de datos**:
+   - Verificar que PostgreSQL esté corriendo: `sudo systemctl status postgresql`
+   - Probar credenciales de base de datos en `config.py`
+   - Verificar que las 4 bases de datos existan y sean accesibles
 
-4. **Verify environment variables**:
+4. **Verificar variables de entorno**:
    ```bash
    cat .env
    ```
 
-### 502 Bad Gateway error
+### Error 502 Bad Gateway
 
-1. **Check if Gunicorn is running**:
+1. **Verificar si Gunicorn está corriendo**:
    ```bash
    pm2 status
    ps aux | grep gunicorn
    ```
 
-2. **Check Nginx configuration**:
+2. **Verificar configuración de Nginx**:
    ```bash
    sudo nginx -t
    sudo systemctl status nginx
    ```
 
-3. **Verify port configuration**:
-   - Ensure Gunicorn is listening on the correct port (default: 5000)
-   - Ensure Nginx proxy_pass matches the Gunicorn port
+3. **Verificar configuración de puerto**:
+   - Asegurar que Gunicorn esté escuchando en el puerto correcto (por defecto: 5000)
+   - Asegurar que proxy_pass de Nginx coincida con el puerto de Gunicorn
 
-### File upload issues
+### Problemas con carga de archivos
 
-1. **Check upload directory permissions**:
+1. **Verificar permisos del directorio de carga**:
    ```bash
    ls -la static/uploads/
    chmod 755 static/uploads/
    ```
 
-2. **Verify Nginx client_max_body_size**:
-   - Should be set to at least 500M to match Flask configuration
+2. **Verificar client_max_body_size de Nginx**:
+   - Debe estar configurado a al menos 500M para coincidir con la configuración de Flask
 
-3. **Check disk space**:
+3. **Verificar espacio en disco**:
    ```bash
    df -h
    ```
 
-### Database connection errors
+### Errores de conexión a base de datos
 
-1. **Verify PostgreSQL is running**:
+1. **Verificar que PostgreSQL esté corriendo**:
    ```bash
    sudo systemctl status postgresql
    ```
 
-2. **Test database connection**:
+2. **Probar conexión a base de datos**:
    ```bash
-   psql -h localhost -U your_db_user -d sedes_uneg
+   psql -h localhost -U su_usuario_db -d sedes_uneg
    ```
 
-3. **Check config.py credentials**:
-   - Ensure all database names, users, and passwords are correct
+3. **Verificar credenciales en config.py**:
+   - Asegurar que todos los nombres de bases de datos, usuarios y contraseñas sean correctos
 
-### Email not sending
+### Email no se envía
 
-1. **Check email configuration in .env**:
-   - Verify SMTP server settings
-   - For Gmail, ensure "App Passwords" are configured
+1. **Verificar configuración de email en .env**:
+   - Verificar configuración del servidor SMTP
+   - Para Gmail, asegurar que las "Contraseñas de Aplicación" estén configuradas
 
-2. **Check application logs**:
+2. **Verificar logs de aplicación**:
    ```bash
    pm2 logs dashboard-unegia | grep -i mail
    ```
 
-3. **Test email connectivity**:
+3. **Probar conectividad de email**:
    ```bash
    telnet smtp.gmail.com 587
    ```
 
-## Security Recommendations
+## Recomendaciones de Seguridad
 
-1. **Never commit sensitive files**:
-   - `.env` (environment variables)
-   - `config.py` (database credentials)
-   - Files in `static/uploads/` (user data)
+1. **Nunca hacer commit de archivos sensibles**:
+   - `.env` (variables de entorno)
+   - `config.py` (credenciales de base de datos)
+   - Archivos en `static/uploads/` (datos de usuarios)
 
-2. **Use strong secret keys**:
-   - Update `SECRET_KEY` in `.env`
-   - Use a random string generator for production
+2. **Usar claves secretas fuertes**:
+   - Actualizar `SECRET_KEY` en `.env`
+   - Usar un generador de cadenas aleatorias para producción
 
-3. **Set up SSL/HTTPS**:
-   - Use Let's Encrypt for free SSL certificates
-   - Uncomment HTTPS section in nginx.conf.example
+3. **Configurar SSL/HTTPS**:
+   - Usar Let's Encrypt para certificados SSL gratuitos
+   - Descomentar sección HTTPS en nginx.conf.example
 
-4. **Regular backups**:
-   - Back up PostgreSQL databases regularly
-   - Back up user uploads in `static/uploads/`
+4. **Respaldos regulares**:
+   - Respaldar bases de datos PostgreSQL regularmente
+   - Respaldar archivos subidos por usuarios en `static/uploads/`
+   - Usar los scripts automatizados de respaldo (ver [scripts/README_SCRIPTS.md](scripts/README_SCRIPTS.md))
 
-5. **Keep dependencies updated**:
+5. **Mantener dependencias actualizadas**:
    ```bash
    pip list --outdated
-   pip install --upgrade package-name
+   pip install --upgrade nombre-paquete
    ```
 
-## Support
+## Soporte
 
-For issues or questions:
-- Check the troubleshooting section above
-- Review PM2 and application logs
-- Contact the development team at SISTEMATIZACION-UNEG
+Para problemas o preguntas:
+- Verificar la sección de solución de problemas anterior
+- Revisar logs de PM2 y de la aplicación
+- Consultar la [Guía de Scripts de Base de Datos](scripts/README_SCRIPTS.md) para problemas relacionados con base de datos
+- Contactar al equipo de desarrollo en SISTEMATIZACION-UNEG
 
-## License
+## Licencia
 
-This project is maintained by UNEG (Universidad Nacional Experimental de Guayana).
+Este proyecto es mantenido por UNEG (Universidad Nacional Experimental de Guayana).
