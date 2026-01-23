@@ -56,7 +56,7 @@ sudo npm install -g pm2
 ### 1. Clone the Repository
 
 ```bash
-cd /home/your-user/projects
+cd /path/to/your/projects
 git clone https://github.com/SISTEMATIZACION-UNEG/dashboard_unegia.git
 cd dashboard_unegia
 ```
@@ -301,7 +301,7 @@ To deploy updates:
 
 ```bash
 # Navigate to project directory
-cd /home/your-user/projects/dashboard_unegia
+cd /path/to/your/dashboard_unegia
 
 # Pull latest changes
 git pull origin main
