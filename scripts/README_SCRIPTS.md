@@ -500,10 +500,10 @@ pg_dump -h localhost -U postgres -d nombre_db -t nombre_tabla > tabla.sql
 7. **Usar archivo .pgpass** en producción en lugar de PGPASSWORD:
    ```bash
    # Crear archivo .pgpass en directorio home
-   echo "localhost:5432:*:username:password" > ~/.pgpass
+   echo "localhost:5432:*:your_username:your_password" > ~/.pgpass
    chmod 600 ~/.pgpass
    # Luego ejecutar scripts sin parámetro -P
-   ./run_migrations.sh -d all -u username
+   ./run_migrations.sh -d all -u your_username
    ```
 
 ## Scripts de Ayuda Rápida

@@ -90,9 +90,9 @@ ${YELLOW}EJEMPLOS:${NC}
     # Importar en producción (con confirmación)
     ./import_data.sh -d all -i ./exports/20240101_120000/ --production
 
-    # Usar variables de entorno
+    # Usar variables de entorno (recomendado para seguridad)
     export DB_USER=postgres
-    export DB_PASSWORD=mipassword
+    export DB_PASSWORD=your_secure_password
     ./import_data.sh -d all -i ./exports/20240101_120000/
 
 ${YELLOW}FORMATOS SOPORTADOS:${NC}
