@@ -72,9 +72,14 @@ ${YELLOW}VARIABLES DE ENTORNO:${NC}
     DB_USER                 Usuario de PostgreSQL
     DB_PASSWORD             Contraseña de PostgreSQL
 
+${YELLOW}NOTA DE SEGURIDAD:${NC}
+    Para mayor seguridad en producción, considere usar archivo .pgpass en lugar
+    de pasar contraseñas por línea de comandos o variables de entorno.
+    Ver: https://www.postgresql.org/docs/current/libpq-pgpass.html
+
 ${YELLOW}EJEMPLOS:${NC}
     # Importar todas las bases de datos desde un directorio
-    ./import_data.sh -d all -i ./exports/20240101_120000/
+    ./import_data.sh -d all -i ./exports/20240101_120000/ -u postgres -P your_secure_password
 
     # Importar solo sedes_uneg
     ./import_data.sh -d sedes_uneg -i ./exports/20240101_120000/

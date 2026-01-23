@@ -68,16 +68,21 @@ ${YELLOW}VARIABLES DE ENTORNO:${NC}
     DB_USER                 Usuario de PostgreSQL
     DB_PASSWORD             Contraseña de PostgreSQL
 
+${YELLOW}NOTA DE SEGURIDAD:${NC}
+    Para mayor seguridad en producción, considere usar archivo .pgpass en lugar
+    de pasar contraseñas por línea de comandos o variables de entorno.
+    Ver: https://www.postgresql.org/docs/current/libpq-pgpass.html
+
 ${YELLOW}EJEMPLOS:${NC}
     # Migrar todas las bases de datos
-    ./run_migrations.sh -d all -u postgres -P mipassword
+    ./run_migrations.sh -d all -u postgres -P your_secure_password
 
     # Migrar solo sedes_uneg
-    ./run_migrations.sh -d sedes_uneg -u postgres -P mipassword
+    ./run_migrations.sh -d sedes_uneg -u postgres -P your_secure_password
 
-    # Usar variables de entorno
+    # Usar variables de entorno (recomendado para seguridad)
     export DB_USER=postgres
-    export DB_PASSWORD=mipassword
+    export DB_PASSWORD=your_secure_password
     ./run_migrations.sh -d all
 
     # Dry run para ver qué se ejecutaría

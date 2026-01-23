@@ -72,12 +72,17 @@ ${YELLOW}VARIABLES DE ENTORNO:${NC}
     DB_USER                 Usuario de PostgreSQL
     DB_PASSWORD             Contraseña de PostgreSQL
 
+${YELLOW}NOTA DE SEGURIDAD:${NC}
+    Para mayor seguridad en producción, considere usar archivo .pgpass en lugar
+    de pasar contraseñas por línea de comandos o variables de entorno.
+    Ver: https://www.postgresql.org/docs/current/libpq-pgpass.html
+
 ${YELLOW}EJEMPLOS:${NC}
     # Exportar todas las bases de datos
-    ./export_data.sh -d all -u postgres -P mipassword
+    ./export_data.sh -d all -u postgres -P your_secure_password
 
     # Exportar solo sedes_uneg
-    ./export_data.sh -d sedes_uneg -u postgres -P mipassword
+    ./export_data.sh -d sedes_uneg -u postgres -P your_secure_password
 
     # Exportar solo datos sin esquema
     ./export_data.sh -d all --data-only
@@ -85,9 +90,9 @@ ${YELLOW}EJEMPLOS:${NC}
     # Exportar sin comprimir
     ./export_data.sh -d all --no-compress
 
-    # Usar variables de entorno
+    # Usar variables de entorno (recomendado para seguridad)
     export DB_USER=postgres
-    export DB_PASSWORD=mipassword
+    export DB_PASSWORD=your_secure_password
     ./export_data.sh -d all -o /backup/mibackup
 
 ${YELLOW}ARCHIVOS GENERADOS:${NC}

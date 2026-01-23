@@ -497,6 +497,14 @@ pg_dump -h localhost -U postgres -d nombre_db -t nombre_tabla > tabla.sql
 4. **Auditar accesos** a bases de datos
 5. **Encriptar backups** si contienen datos sensibles
 6. **Rotar credenciales** periódicamente
+7. **Usar archivo .pgpass** en producción en lugar de PGPASSWORD:
+   ```bash
+   # Crear archivo .pgpass en directorio home
+   echo "localhost:5432:*:username:password" > ~/.pgpass
+   chmod 600 ~/.pgpass
+   # Luego ejecutar scripts sin parámetro -P
+   ./run_migrations.sh -d all -u username
+   ```
 
 ## Scripts de Ayuda Rápida
 
