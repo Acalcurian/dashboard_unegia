@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // === Cargar tarjetas ===
     async function actualizarTarjetas() {
         try {
-            const response = await fetch('/api/fallas_por_categoria');
+            const response = await fetch('/dashboard_unegia/api/fallas_por_categoria');
             const data = await response.json();
             contenedorTarjetas.innerHTML = '';
 
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // === Cargar gráfico principal ===
     async function cargarGrafico() {
         try {
-            const response = await fetch('/api/fallas_por_sede_categoria'); // tu endpoint Flask
+            const response = await fetch('/dashboard_unegia/api/fallas_por_sede_categoria'); // tu endpoint Flask
             const data = await response.json();
 
             const sedes = data.sedes;

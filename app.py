@@ -19,6 +19,16 @@ app = Flask(__name__)
 app.secret_key = "12345"
 app.register_blueprint(dashboard_bp)
 
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from app import app  # tu Flask app principal
+
+# Todas las rutas bajo /dashboard_unegia
+app.wsgi_app = DispatcherMiddleware(app, {
+    '/dashboard_unegia': app.wsgi_app
+})
+
+app.config['APPLICATION_ROOT'] = '/dashboard_unegia'
+
 
 # -------------------------------
 # CONFIGURACIÓN DE CORREO
